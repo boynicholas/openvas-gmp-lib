@@ -63,7 +63,7 @@ func (a *CreateScanner) GetRespStruct() interface{} {
 func (a *CreateScanner) Handler(data interface{}) (interface{}, error) {
 	resp := data.(*CreateScannerResp)
 
-	if resp.Status != "200" {
+	if !HasSuccess(resp.Status) {
 		return nil, errors.New(resp.StatusText)
 	}
 

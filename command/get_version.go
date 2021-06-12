@@ -42,7 +42,7 @@ func (a *GetVersion) GetRespStruct() interface{} {
 func (a *GetVersion) Handler(data interface{}) (interface{}, error) {
 	resp := data.(*GetVersionResp)
 
-	if resp.Status != "200" {
+	if !HasSuccess(resp.Status) {
 		return nil, errors.New(resp.StatusText)
 	}
 

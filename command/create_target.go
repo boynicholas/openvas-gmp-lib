@@ -85,7 +85,7 @@ func (a *CreateTarget) GetRespStruct() interface{} {
 func (a *CreateTarget) Handler(data interface{}) (interface{}, error) {
 	resp := data.(*CreateTargetResp)
 
-	if resp.Status != "201" {
+	if !HasSuccess(resp.Status) {
 		return nil, errors.New(resp.StatusText)
 	}
 

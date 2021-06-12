@@ -3,7 +3,6 @@ package gmp
 import (
 	"context"
 	"encoding/xml"
-	"fmt"
 	"os"
 
 	"github.com/google/uuid"
@@ -156,13 +155,51 @@ func (g *Gmp) CreateTarget(target *command.CreateTarget) (*uuid.UUID, error) {
 	return &uid, nil
 }
 
+func (g *Gmp) CreateTask(task *command.CreateTask) (*uuid.UUID, error) {
+	id, err := g.exec(task, task)
+
+	if err != nil {
+		return nil, err
+	}
+
+	uid, _ := uuid.Parse(id.(string))
+	return &uid, nil
+}
+
+func (g *Gmp) GetSettings(filter *command.GetSettings) (*command.GetSettingsResp, error) {
+	resp, err := g.exec(filter, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.(*command.GetSettingsResp), nil
+}
+
+func (g *Gmp) StartTask(req *command.StartTask) (*uuid.UUID, error) {
+	reportId, err := g.exec(req, req)
+	if err != nil {
+		return nil, err
+	}
+
+	uid, _ := uuid.Parse(reportId.(string))
+	return &uid, nil
+}
+
+func (g *Gmp) SyncConfig(req *command.SyncConfig) error {
+	_, err := g.exec(req, req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (g *Gmp) exec(req interface{}, cmd Command) (interface{}, error) {
 	data, err := xml.Marshal(req)
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Println(string(data))
 	rp := cmd.GetRespStruct()
 
 	err = g.client.Send(data, rp)

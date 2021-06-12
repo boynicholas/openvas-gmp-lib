@@ -9,7 +9,7 @@ import (
 	"lyml.me/openvas-gmp-lib/command"
 )
 
-func TestCreateTarget(t *testing.T) {
+func TestStartTask(t *testing.T) {
 	g, err := gmp.NewGmp(GetGmpConfig())
 	if err != nil {
 		log.Fatalln(err)
@@ -24,14 +24,13 @@ func TestCreateTarget(t *testing.T) {
 		return
 	}
 
-	target := command.NewCreateTarget(&command.CreateTarget{
-		Name:      "185.252.79.75",
-		Comment:   "Nothing detected auto created",
-		Hosts:     "185.252.79.75",
-		PortRange: "21,22,80,143,443,465,587,993,2121,4333,8333,9900,18080,",
-	})
+	uid, err := g.StartTask(command.NewStartTask("7733f39a-99e0-4c24-846e-4150bbd55357"))
 
-	uid, err := g.CreateTarget(target)
+	if err != nil {
+		log.Fatalln(err)
+		t.FailNow()
+		return
+	}
+
 	assert.NotNil(t, uid)
-	assert.NoError(t, err)
 }

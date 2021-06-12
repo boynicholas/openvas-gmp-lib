@@ -22,7 +22,6 @@ type AuthenticateResp struct {
 }
 
 func NewAuthenticate(username string, password string) *Authenticate {
-
 	return &Authenticate{
 		Credentials: &Credentials{
 			Username: username,
@@ -52,7 +51,7 @@ func (a *Authenticate) GetRespStruct() interface{} {
 func (a *Authenticate) Handler(data interface{}) (interface{}, error) {
 	resp := data.(*AuthenticateResp)
 
-	if resp.Status != "200" {
+	if !HasSuccess(resp.Status) {
 		return nil, errors.New(resp.StatusText)
 	}
 

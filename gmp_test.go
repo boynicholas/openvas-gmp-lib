@@ -20,7 +20,6 @@ func TestGmpNew(t *testing.T) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-
 }
 
 func GetGmpConfig() GmpConfig {
