@@ -4,9 +4,9 @@ import (
 	"log"
 	"testing"
 
+	gmp "github.com/boynicholas/openvas-gmp-lib"
+	"github.com/boynicholas/openvas-gmp-lib/command"
 	"github.com/stretchr/testify/assert"
-	gmp "lyml.me/openvas-gmp-lib"
-	"lyml.me/openvas-gmp-lib/command"
 )
 
 func TestStartTask(t *testing.T) {

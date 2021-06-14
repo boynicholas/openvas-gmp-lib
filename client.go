@@ -11,7 +11,7 @@ import (
 	"net"
 	"sync"
 
-	"lyml.me/openvas-gmp-lib/command"
+	"github.com/boynicholas/openvas-gmp-lib/command"
 )
 
 type Client struct {

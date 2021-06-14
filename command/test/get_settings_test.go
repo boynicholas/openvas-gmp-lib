@@ -5,8 +5,8 @@ import (
 	"log"
 	"testing"
 
-	gmp "lyml.me/openvas-gmp-lib"
-	"lyml.me/openvas-gmp-lib/command"
+	gmp "github.com/boynicholas/openvas-gmp-lib"
+	"github.com/boynicholas/openvas-gmp-lib/command"
 )
 
 func TestGetSettings(t *testing.T) {

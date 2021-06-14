@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"testing"
 
-	"lyml.me/openvas-gmp-lib/command"
+	"github.com/boynicholas/openvas-gmp-lib/command"
 )
 
 func TestGmpNew(t *testing.T) {

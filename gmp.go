@@ -5,8 +5,8 @@ import (
 	"encoding/xml"
 	"os"
 
+	"github.com/boynicholas/openvas-gmp-lib/command"
 	"github.com/google/uuid"
-	"lyml.me/openvas-gmp-lib/command"
 )
 
 type Command interface {
