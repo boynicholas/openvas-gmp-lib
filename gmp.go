@@ -21,6 +21,8 @@ type GmpVersion string
 const (
 	// https://docs.greenbone.net/API/GMP/gmp-21.04.html
 	GMP_21_04 GmpVersion = "21.4"
+	// https://docs.greenbone.net/API/GMP/gmp-21.10.html
+	GMP_21_10 GmpVersion = "21.10"
 	// https://docs.greenbone.net/API/GMP/gmp-20.08.html
 	GMP_20_08 GmpVersion = "20.8"
 
@@ -32,6 +34,8 @@ func GetGmpVersion(version string) GmpVersion {
 		return GMP_21_04
 	} else if version == string(GMP_20_08) {
 		return GMP_20_08
+	} else if version == string(GMP_21_10) {
+		return GMP_21_10
 	} else {
 		return Nil
 	}
