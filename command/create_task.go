@@ -16,7 +16,7 @@ type CreateTask struct {
 	Comment         string                 `xml:"comment,omitempty" json:"comment"`                   // A comment on the task.
 	Copy            string                 `xml:"copy,omitempty" json:"copy"`                         // The UUID of an existing task.
 	Alterable       bool                   `xml:"alterable,omitempty" json:"alterable"`               // Whether the task is alterable.
-	UsageType       CreateTaskUsageType    `xml:"usage_type" json:"usage_type"`                       // Usage type for the task (scan or audit), defaulting to scan.
+	UsageType       UsageType              `xml:"usage_type" json:"usage_type"`                       // Usage type for the task (scan or audit), defaulting to scan.
 	Config          *CreateTaskConfig      `xml:"config" json:"config"`                               // The scan configuration used by the task.
 	Target          *CreateTaskTarget      `xml:"target" json:"target"`                               // The hosts scanned by the task.
 	HostsOrdering   string                 `xml:"hosts_ordering,omitempty" json:"hosts_ordering"`     // The order hosts are scanned in.
@@ -27,13 +27,6 @@ type CreateTask struct {
 	Observers       string                 `xml:"observers,omitempty" json:"observers"`               // Users allowed to observe this task.
 	Preferences     *CreateTaskPreferences `xml:"preferences,omitempty" json:"preferences"`
 }
-
-type CreateTaskUsageType string
-
-const (
-	Scan  CreateTaskUsageType = "scan"
-	Audit CreateTaskUsageType = "audit"
-)
 
 type CreateTaskConfig struct {
 	Id string `xml:"id,attr" json:"id"`

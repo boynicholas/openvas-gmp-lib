@@ -18,3 +18,12 @@ type GmpResponse struct {
 func HasSuccess(status string) bool {
 	return strings.HasPrefix(status, "2")
 }
+
+type UsageType string
+
+const (
+	Scan   UsageType = "scan"
+	Audit  UsageType = "audit"
+	Policy UsageType = "policy"
+	All    UsageType = ""
+)

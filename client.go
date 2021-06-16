@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"net"
 	"sync"
+	"time"
 
 	"github.com/boynicholas/openvas-gmp-lib/command"
 )
@@ -20,21 +21,27 @@ type Client struct {
 	ctx    context.Context
 	mutex  sync.Mutex
 	reader *xml.Decoder
+	cfg    *ClientConfig
 }
 
-type clientConfig struct {
-	caPath      string
-	cliCertPath string
-	cliKeyPath  string
+type ClientConfig struct {
+	CaPath       string
+	CliCertPath  string
+	CliKeyPath   string
+	WriteTimeout time.Duration
+	ReadTimeout  time.Duration
+	ConnTimeout  time.Duration
 }
 
-func newClient(ctx context.Context, cfg *clientConfig) (*Client, error) {
-	cert, err := tls.LoadX509KeyPair(cfg.cliCertPath, cfg.cliKeyPath)
+var DefaultTimeout time.Duration = time.Second * 10
+
+func NewClient(ctx context.Context, cfg *ClientConfig) (*Client, error) {
+	cert, err := tls.LoadX509KeyPair(cfg.CliCertPath, cfg.CliKeyPath)
 	if err != nil {
 		return nil, err
 	}
 
-	caBytes, err := ioutil.ReadFile(cfg.caPath)
+	caBytes, err := ioutil.ReadFile(cfg.CaPath)
 	if err != nil {
 		return nil, err
 	}
@@ -60,14 +67,27 @@ func newClient(ctx context.Context, cfg *clientConfig) (*Client, error) {
 		Config:    tlsCfg,
 	}
 
+	if cfg.ConnTimeout == 0 {
+		cfg.ConnTimeout = DefaultTimeout
+	}
+	if cfg.WriteTimeout == 0 {
+		cfg.WriteTimeout = DefaultTimeout
+	}
+	if cfg.ReadTimeout == 0 {
+		cfg.ReadTimeout = DefaultTimeout
+	}
+
 	return &Client{
+		cfg:    cfg,
 		ctx:    ctx,
 		dialer: dialer,
 	}, nil
 }
 
 func (c *Client) Connect(addr string, port uint16) error {
-	conn, err := c.dialer.DialContext(c.ctx, "tcp", fmt.Sprintf("%s:%d", addr, port))
+	ctx, cancel := context.WithTimeout(c.ctx, c.cfg.ConnTimeout)
+	defer cancel()
+	conn, err := c.dialer.DialContext(ctx, "tcp", fmt.Sprintf("%s:%d", addr, port))
 	if err != nil {
 		return err
 	}
@@ -81,8 +101,15 @@ func (c *Client) Connect(addr string, port uint16) error {
 func (c *Client) Send(datas []byte, v interface{}) error {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
-	_, err := c.conn.Write(datas)
+
+	err := c.conn.SetWriteDeadline(time.Now().Add(c.cfg.WriteTimeout))
 	if err != nil {
+		return err
+	}
+
+	_, err = c.conn.Write(datas)
+	if err != nil {
+		c.conn.Close()
 		return err
 	}
 
@@ -90,6 +117,11 @@ func (c *Client) Send(datas []byte, v interface{}) error {
 }
 
 func (c *Client) read(val interface{}) error {
+	err := c.conn.SetReadDeadline(time.Now().Add(c.cfg.ReadTimeout))
+	if err != nil {
+		return err
+	}
+
 	token, err := c.reader.Token()
 	if err != nil {
 		return err
