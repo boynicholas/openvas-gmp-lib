@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestStartTask(t *testing.T) {
+func TestGetScanner(t *testing.T) {
 	g, err := gmp.NewGmp(GetGmpConfig())
 	if err != nil {
 		log.Fatalln(err)
@@ -24,13 +24,12 @@ func TestStartTask(t *testing.T) {
 		return
 	}
 
-	uid, err := g.StartTask(command.NewStartTask("ee3f71e9-0894-48d3-9a01-9fc7a2843568"))
-
+	resp, err := g.GetScanner(command.NewGetAllScanner())
 	if err != nil {
 		log.Fatalln(err)
 		t.FailNow()
 		return
 	}
 
-	assert.NotNil(t, uid)
+	assert.NotNil(t, resp)
 }

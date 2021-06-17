@@ -203,6 +203,15 @@ func (g *Gmp) StartTask(req *command.StartTask) (*uuid.UUID, error) {
 	return &uid, nil
 }
 
+func (g *Gmp) ModifyTask(req *command.ModifyTask) error {
+	_, err := g.exec(req, req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (g *Gmp) SyncConfig(req *command.SyncConfig) error {
 	_, err := g.exec(req, req)
 	if err != nil {
@@ -219,6 +228,19 @@ func (g *Gmp) GetNvtFamilies(req *command.GetNvtFamilies) (*command.GetNvtFamili
 	}
 
 	return resp.(*command.GetNvtFamiliesResp), nil
+}
+
+func (g *Gmp) GetScanner(req *command.GetScanner) (*command.GetScannerResp, error) {
+	resp, err := g.exec(req, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.(*command.GetScannerResp), nil
+}
+
+func (g *Gmp) Close() error {
+	return g.client.conn.Close()
 }
 
 func (g *Gmp) exec(req interface{}, cmd Command) (interface{}, error) {

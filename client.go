@@ -53,9 +53,8 @@ func NewClient(ctx context.Context, cfg *ClientConfig) (*Client, error) {
 	}
 
 	tlsCfg := &tls.Config{
-		RootCAs:            clientCertPool,
-		Certificates:       []tls.Certificate{cert},
-		InsecureSkipVerify: true,
+		RootCAs:      clientCertPool,
+		Certificates: []tls.Certificate{cert},
 	}
 
 	if ctx == nil {

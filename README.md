@@ -39,6 +39,8 @@ func TestGmpNew(t *testing.T) {
 	}
 
 	// todo something.
+
+	defer gmp.Close()
 }
 
 func GetGmpConfig() GmpConfig {

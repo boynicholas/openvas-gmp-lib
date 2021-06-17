@@ -49,7 +49,7 @@ type CreateTaskSchedule struct {
 }
 
 type CreateTaskPreferences struct {
-	Preference []CreateTaskPreference `xml:"preference" json:"preference"`
+	Preference []*CreateTaskPreference `xml:"preference" json:"preference"`
 }
 
 type CreateTaskPreference struct {
