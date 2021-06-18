@@ -239,6 +239,15 @@ func (g *Gmp) GetScanner(req *command.GetScanner) (*command.GetScannerResp, erro
 	return resp.(*command.GetScannerResp), nil
 }
 
+func (g *Gmp) GetTasks(req *command.GetTasks) (*command.GetTasksResp, error) {
+	resp, err := g.exec(req, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.(*command.GetTasksResp), nil
+}
+
 func (g *Gmp) Close() error {
 	return g.client.conn.Close()
 }

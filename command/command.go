@@ -55,3 +55,48 @@ const (
 	OrderAscending  Order = "ascending"
 	OrderDescending Order = "descending"
 )
+
+type Permissions struct {
+	Permission []*Permission `xml:"permission" json:"permission"`
+}
+
+type Permission struct {
+	Name string `xml:"name" json:"name"` // The name of the permission.
+}
+
+type UserTags struct {
+	Count int    `xml:"count" json:"count"` // Number of attached tags.
+	Tags  []*Tag `xml:"tag" json:"tag"`     // Short info on an individual tag (only if details were requested).
+}
+
+type Tag struct {
+	Id      string `xml:"id,attr" json:"id"`      // UUID of the tag.
+	Name    string `xml:"name" json:"name"`       // Name of the tag (usually namespace:predicate).
+	Value   string `xml:"value" json:"value"`     // Value of the tag.
+	Comment string `xml:"comment" json:"comment"` // Comment for the tag.
+}
+
+type Filters struct {
+	Id       string    `xml:"id,attr" json:"id"`        // UUID of filter if any, else 0.
+	Term     string    `xml:"term" json:"term"`         // Filter term.
+	Name     string    `xml:"name" json:"name"`         // Filter name, if applicable.
+	Keywords *Keywords `xml:"keywords" json:"keywords"` // Filter broken down into keywords.
+}
+
+type Keywords struct {
+	Keyword []*Keyword `xml:"keyword" json:"keyword"`
+}
+
+type Keyword struct {
+	Column   string `xml:"column" json:"column"`     // Column prefix.
+	Relation string `xml:"relation" json:"relation"` // Relation operator.
+	Value    string `xml:"value" json:"value"`       // The filter text.
+}
+
+type Sort struct {
+	Field Field `xml:"field" json:"field"`
+}
+
+type Field struct {
+	Order Order `xml:"order" json:"order"`
+}
