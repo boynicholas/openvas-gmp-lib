@@ -276,7 +276,7 @@ func (g *Gmp) ModifyScanner(req *command.ModifyScanner) error {
 }
 
 func (g *Gmp) Close() error {
-	return g.client.conn.Close()
+	return g.client.session.Close()
 }
 
 func (g *Gmp) exec(req interface{}, cmd Command) (interface{}, error) {

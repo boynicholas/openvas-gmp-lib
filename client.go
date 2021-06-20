@@ -13,15 +13,16 @@ import (
 	"time"
 
 	"github.com/boynicholas/openvas-gmp-lib/command"
+	"github.com/hashicorp/yamux"
 )
 
 type Client struct {
-	dialer tls.Dialer
-	conn   net.Conn
-	ctx    context.Context
-	mutex  sync.Mutex
-	reader *xml.Decoder
-	cfg    *ClientConfig
+	dialer  tls.Dialer
+	session *yamux.Session
+	ctx     context.Context
+	mutex   sync.Mutex
+	reader  *xml.Decoder
+	cfg     *ClientConfig
 }
 
 type ClientConfig struct {
@@ -90,9 +91,11 @@ func (c *Client) Connect(addr string, port uint16) error {
 	if err != nil {
 		return err
 	}
-
-	c.conn = conn
-	c.reader = xml.NewDecoder(c.conn)
+	session, err := yamux.Client(conn, nil)
+	if err != nil {
+		return err
+	}
+	c.session = session
 	return nil
 }
 
@@ -100,27 +103,32 @@ func (c *Client) Connect(addr string, port uint16) error {
 func (c *Client) Send(datas []byte, v interface{}) error {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
-
-	err := c.conn.SetWriteDeadline(time.Now().Add(c.cfg.WriteTimeout))
+	stream, err := c.session.OpenStream()
+	if err != nil {
+		return err
+	}
+	defer stream.Close()
+	err = stream.SetWriteDeadline(time.Now().Add(c.cfg.WriteTimeout))
 	if err != nil {
 		return err
 	}
 
-	_, err = c.conn.Write(datas)
+	_, err = stream.Write(datas)
 	if err != nil {
-		c.conn.Close()
+		stream.Close()
 		return err
 	}
 
-	return c.read(v)
+	// Create Reader
+	err = stream.SetReadDeadline(time.Now().Add(c.cfg.ReadTimeout))
+	if err != nil {
+		return err
+	}
+	reader := xml.NewDecoder(stream)
+	return c.read(reader, v)
 }
 
-func (c *Client) read(val interface{}) error {
-	err := c.conn.SetReadDeadline(time.Now().Add(c.cfg.ReadTimeout))
-	if err != nil {
-		return err
-	}
-
+func (c *Client) read(reader *xml.Decoder, val interface{}) error {
 	token, err := c.reader.Token()
 	if err != nil {
 		return err
