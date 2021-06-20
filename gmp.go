@@ -248,6 +248,15 @@ func (g *Gmp) GetTasks(req *command.GetTasks) (*command.GetTasksResp, error) {
 	return resp.(*command.GetTasksResp), nil
 }
 
+func (g *Gmp) GetTargets(req *command.GetTargets) (*command.GetTargetsResp, error) {
+	resp, err := g.exec(req, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.(*command.GetTargetsResp), nil
+}
+
 func (g *Gmp) ModifyConfig(req *command.ModifyConfig) error {
 	_, err := g.exec(req, req)
 	if err != nil {
