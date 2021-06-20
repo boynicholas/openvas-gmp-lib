@@ -248,6 +248,24 @@ func (g *Gmp) GetTasks(req *command.GetTasks) (*command.GetTasksResp, error) {
 	return resp.(*command.GetTasksResp), nil
 }
 
+func (g *Gmp) ModifyConfig(req *command.ModifyConfig) error {
+	_, err := g.exec(req, req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (g *Gmp) ModifyScanner(req *command.ModifyScanner) error {
+	_, err := g.exec(req, req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (g *Gmp) Close() error {
 	return g.client.conn.Close()
 }

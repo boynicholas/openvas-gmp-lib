@@ -8,7 +8,7 @@ import (
 	"github.com/boynicholas/openvas-gmp-lib/command"
 )
 
-func TestModifyTask(t *testing.T) {
+func TestModifyScanner(t *testing.T) {
 	g, err := gmp.NewGmp(GetGmpConfig())
 	if err != nil {
 		log.Fatalln(err)
@@ -23,17 +23,12 @@ func TestModifyTask(t *testing.T) {
 		return
 	}
 
-	err = g.ModifyTask(command.NewModifyTask(&command.ModifyTask{
-		TaskId: "4aa27f6e-f1e9-45b0-b3b5-b552ab8c15fb",
-		Config: &command.ModifyTaskConfig{
-			Id: "b17204be-c413-47b0-bfc1-d1a776d4848d",
-		},
-		Scanner: &command.ModifyTaskScanner{
-			Id: "f482bb74-41b2-4a1e-bd19-f4515f1e3b39",
-		},
-		Alert: []*command.ModifyTaskAlert{{
-			Id: "1d3001d7-9ef5-432b-b47e-2785c706949a",
-		}},
+	err = g.ModifyScanner(command.NewModifyScanner(&command.ModifyScanner{
+		ScannerId: "f04ecbd5-6423-49b0-a92f-a99d2617dc31",
+		Type:      2,
+		Name:      "Openvas Scanner 3",
+		Host:      "172.31.11.32",
+		Port:      33445,
 	}))
 
 	if err != nil {
