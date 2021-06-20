@@ -11,10 +11,10 @@ import (
 type GetTargets struct {
 	XMLName  xml.Name `xml:"get_targets"`
 	TargetId string   `xml:"target_id,attr,omitempty"` // ID of single target to get.
-	Filter   string   `xml:"filter,omitempty"`         // Filter term to use to filter query.
-	FiltId   string   `xml:"filt_id,omitempty"`        // ID of filter to use to filter query.
-	Trash    bool     `xml:"trash,omitempty"`          // Whether to get the trashcan tasks instead.
-	Tasks    bool     `xml:"tasks,omitempty"`          // Whether to include list of tasks that use the target.
+	Filter   string   `xml:"filter,attr,omitempty"`    // Filter term to use to filter query.
+	FiltId   string   `xml:"filt_id,attr,omitempty"`   // ID of filter to use to filter query.
+	Trash    bool     `xml:"trash,attr,omitempty"`     // Whether to get the trashcan tasks instead.
+	Tasks    bool     `xml:"tasks,attr,omitempty"`     // Whether to include list of tasks that use the target.
 }
 
 type GetTargetsResp struct {

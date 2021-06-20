@@ -24,7 +24,10 @@ func TestGetTargets(t *testing.T) {
 		return
 	}
 
-	resp, err := g.GetTargets(command.NewGetAllTargets())
+	resp, err := g.GetTargets(command.NewGetTargets(&command.GetTargets{
+		Filter: "hosts=5.103.137.146",
+	}))
+
 	if err != nil {
 		log.Fatalln(err)
 		t.FailNow()
