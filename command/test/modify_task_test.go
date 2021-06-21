@@ -16,13 +16,6 @@ func TestModifyTask(t *testing.T) {
 		return
 	}
 
-	err = g.Authenticate(GetAuthenticate())
-	if err != nil {
-		log.Fatalln(err)
-		t.FailNow()
-		return
-	}
-
 	err = g.ModifyTask(command.NewModifyTask(&command.ModifyTask{
 		TaskId: "4aa27f6e-f1e9-45b0-b3b5-b552ab8c15fb",
 		Config: &command.ModifyTaskConfig{

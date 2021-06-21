@@ -16,6 +16,8 @@ func GetGmpConfig() gmp.GmpConfig {
 		TlsCaCertPath:     os.Getenv("GmpCaCert"),
 		TlsClientCertPath: os.Getenv("GmpClientCert"),
 		TlsClientKeyPath:  os.Getenv("GmpClientKey"),
+		Username:          os.Getenv("GmpUser"),
+		Password:          os.Getenv("GmpPass"),
 	}
 }
 

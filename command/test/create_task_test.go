@@ -17,13 +17,6 @@ func TestCreateTask(t *testing.T) {
 		return
 	}
 
-	err = g.Authenticate(GetAuthenticate())
-	if err != nil {
-		log.Fatalln(err)
-		t.FailNow()
-		return
-	}
-
 	uid, err := g.CreateTask(command.NewCreateTask(&command.CreateTask{
 		Name:      "185.252.79.75",
 		Comment:   "Nothing detected auto created",

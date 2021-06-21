@@ -13,24 +13,28 @@ import (
 	"time"
 
 	"github.com/boynicholas/openvas-gmp-lib/command"
-	"github.com/hashicorp/yamux"
 )
 
 type Client struct {
-	dialer  tls.Dialer
-	session *yamux.Session
-	ctx     context.Context
-	mutex   sync.Mutex
-	cfg     *ClientConfig
+	dialer tls.Dialer
+	ctx    context.Context
+	cfg    *ClientConfig
 }
 
 type ClientConfig struct {
+	Addr         string
+	Port         uint16
 	CaPath       string
 	CliCertPath  string
 	CliKeyPath   string
 	WriteTimeout time.Duration
 	ReadTimeout  time.Duration
 	ConnTimeout  time.Duration
+}
+
+type ConnInstance struct {
+	conn  net.Conn
+	mutex sync.Mutex
 }
 
 var DefaultTimeout time.Duration = time.Second * 10
@@ -83,47 +87,41 @@ func NewClient(ctx context.Context, cfg *ClientConfig) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) Connect(addr string, port uint16) error {
+type CloseFunc func()
+
+func (c *Client) GetConnect() (*ConnInstance, CloseFunc, error) {
 	ctx, cancel := context.WithTimeout(c.ctx, c.cfg.ConnTimeout)
 	defer cancel()
-	conn, err := c.dialer.DialContext(ctx, "tcp", fmt.Sprintf("%s:%d", addr, port))
+	conn, err := c.dialer.DialContext(ctx, "tcp", fmt.Sprintf("%s:%d", c.cfg.Addr, c.cfg.Port))
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
-	session, err := yamux.Client(conn, nil)
-	if err != nil {
-		return err
-	}
-	c.session = session
-	return nil
+
+	return &ConnInstance{conn: conn}, func() { conn.Close() }, nil
 }
 
 // Send message
-func (c *Client) Send(datas []byte, v interface{}) error {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-	stream, err := c.session.OpenStream()
-	if err != nil {
-		return err
-	}
-	defer stream.Close()
-	err = stream.SetWriteDeadline(time.Now().Add(c.cfg.WriteTimeout))
+func (c *Client) Send(conn *ConnInstance, datas []byte, v interface{}) error {
+	conn.mutex.Lock()
+	defer conn.mutex.Unlock()
+
+	err := conn.conn.SetWriteDeadline(time.Now().Add(c.cfg.WriteTimeout))
 	if err != nil {
 		return err
 	}
 
-	_, err = stream.Write(datas)
+	_, err = conn.conn.Write(datas)
 	if err != nil {
-		stream.Close()
+		conn.conn.Close()
 		return err
 	}
 
 	// Create Reader
-	err = stream.SetReadDeadline(time.Now().Add(c.cfg.ReadTimeout))
+	err = conn.conn.SetReadDeadline(time.Now().Add(c.cfg.ReadTimeout))
 	if err != nil {
 		return err
 	}
-	reader := xml.NewDecoder(stream)
+	reader := xml.NewDecoder(conn.conn)
 	return c.read(reader, v)
 }
 

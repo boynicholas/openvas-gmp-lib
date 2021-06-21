@@ -17,13 +17,6 @@ func TestCreateTarget(t *testing.T) {
 		return
 	}
 
-	err = g.Authenticate(GetAuthenticate())
-	if err != nil {
-		log.Fatalln(err)
-		t.FailNow()
-		return
-	}
-
 	target := command.NewCreateTarget(&command.CreateTarget{
 		Name:      "185.252.79.75",
 		Comment:   "Nothing detected auto created",

@@ -17,13 +17,6 @@ func TestStartTask(t *testing.T) {
 		return
 	}
 
-	err = g.Authenticate(GetAuthenticate())
-	if err != nil {
-		log.Fatalln(err)
-		t.FailNow()
-		return
-	}
-
 	uid, err := g.StartTask(command.NewStartTask("ee3f71e9-0894-48d3-9a01-9fc7a2843568"))
 
 	if err != nil {

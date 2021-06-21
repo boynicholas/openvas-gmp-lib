@@ -17,13 +17,6 @@ func TestGetTargets(t *testing.T) {
 		return
 	}
 
-	err = g.Authenticate(GetAuthenticate())
-	if err != nil {
-		log.Fatalln(err)
-		t.FailNow()
-		return
-	}
-
 	resp, err := g.GetTargets(command.NewGetTargets(&command.GetTargets{
 		Filter: "hosts=5.103.137.146",
 	}))

@@ -17,13 +17,6 @@ func TestGetScanner(t *testing.T) {
 		return
 	}
 
-	err = g.Authenticate(GetAuthenticate())
-	if err != nil {
-		log.Fatalln(err)
-		t.FailNow()
-		return
-	}
-
 	resp, err := g.GetScanner(command.NewGetAllScanner())
 	if err != nil {
 		log.Fatalln(err)

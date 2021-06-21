@@ -4,8 +4,6 @@ import (
 	"context"
 	"encoding/xml"
 	"errors"
-	"fmt"
-	"net"
 	"os"
 
 	"github.com/boynicholas/openvas-gmp-lib/command"
@@ -67,10 +65,8 @@ type GmpConfig struct {
 	// GVM Client key path
 	TlsClientKeyPath string
 
-	IsReconnect bool // Whether to reconnect when the connection is closed
-
-	Username string // Cannot be empty when reconnect is enabled
-	Password string // Cannot be empty when reconnect is enabled
+	Username string
+	Password string
 
 	ctx context.Context
 }
@@ -96,16 +92,16 @@ func NewGmp(cfg GmpConfig) (*Gmp, error) {
 		CaPath:      cfg.TlsCaCertPath,
 		CliCertPath: cfg.TlsClientCertPath,
 		CliKeyPath:  cfg.TlsClientKeyPath,
+		Addr:        cfg.Addr,
+		Port:        cfg.Port,
 	})
 
 	if err != nil {
 		return nil, err
 	}
 
-	if cfg.IsReconnect {
-		if cfg.Username == "" || cfg.Password == "" {
-			return nil, errors.New("when reconnection is enabled, the username and password cannot be empty")
-		}
+	if cfg.Username == "" || cfg.Password == "" {
+		return nil, errors.New("when reconnection is enabled, the username and password cannot be empty")
 	}
 
 	gmp := &Gmp{
@@ -123,10 +119,6 @@ func NewGmp(cfg GmpConfig) (*Gmp, error) {
 }
 
 func (g *Gmp) init() error {
-	err := g.client.Connect(g.cfg.Addr, g.cfg.Port)
-	if err != nil {
-		return err
-	}
 
 	// Check version
 	version, err := g.GetVersion()
@@ -143,8 +135,8 @@ func (g *Gmp) init() error {
 	return nil
 }
 
-func (g *Gmp) Authenticate(authenticate *command.Authenticate) error {
-	_, err := g.exec(authenticate, authenticate)
+func (g *Gmp) authenticate(conn *ConnInstance, authenticate *command.Authenticate) error {
+	_, err := g.execWithStream(conn, authenticate, authenticate)
 	if err != nil {
 		return err
 	}
@@ -154,8 +146,13 @@ func (g *Gmp) Authenticate(authenticate *command.Authenticate) error {
 
 func (g *Gmp) GetVersion() (string, error) {
 	v := command.NewGetVersion()
-	r, err := g.exec(v, v)
+	conn, close, err := g.client.GetConnect()
+	if err != nil {
+		return "", err
+	}
+	defer close()
 
+	r, err := g.execWithStream(conn, v, v)
 	if err != nil {
 		return "", err
 	}
@@ -164,6 +161,7 @@ func (g *Gmp) GetVersion() (string, error) {
 }
 
 func (g *Gmp) CreateTarget(target *command.CreateTarget) (*uuid.UUID, error) {
+
 	id, err := g.exec(target, target)
 	if err != nil {
 		return nil, err
@@ -275,11 +273,7 @@ func (g *Gmp) ModifyScanner(req *command.ModifyScanner) error {
 	return nil
 }
 
-func (g *Gmp) Close() error {
-	return g.client.session.Close()
-}
-
-func (g *Gmp) exec(req interface{}, cmd Command) (interface{}, error) {
+func (g *Gmp) execWithStream(conn *ConnInstance, req interface{}, cmd Command) (interface{}, error) {
 	data, err := xml.Marshal(req)
 	if err != nil {
 		return nil, err
@@ -287,41 +281,26 @@ func (g *Gmp) exec(req interface{}, cmd Command) (interface{}, error) {
 
 	rp := cmd.GetRespStruct()
 
-	err = g.client.Send(data, rp)
+	err = g.client.Send(conn, data, rp)
 	if err != nil {
-		_, ok := err.(net.Error)
-		if !ok {
-			return nil, err
-		}
-
-		if g.cfg.IsReconnect {
-			fmt.Printf("[Gmp] GMP connection error: %s, try to reconnect", err.Error())
-
-			// reconnect
-			err = g.reconnect()
-			if err != nil {
-				return nil, err
-			} else {
-				return g.exec(req, cmd)
-			}
-		} else {
-			return nil, err
-		}
+		return nil, err
 	}
 
 	return cmd.Handler(rp)
 }
 
-func (g *Gmp) reconnect() error {
-	err := g.init()
+func (g *Gmp) exec(req interface{}, cmd Command) (interface{}, error) {
+	conn, close, err := g.client.GetConnect()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	err = g.Authenticate(command.NewAuthenticate(g.cfg.Username, g.cfg.Password))
+	defer close()
+
+	err = g.authenticate(conn, command.NewAuthenticate(g.cfg.Username, g.cfg.Password))
 	if err != nil {
-		return err
+		return nil, command.ErrInvalidUsernameOrPassword
 	}
 
-	return nil
+	return g.execWithStream(conn, req, cmd)
 }

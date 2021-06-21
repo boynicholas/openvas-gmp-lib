@@ -16,13 +16,6 @@ func TestModifyScanner(t *testing.T) {
 		return
 	}
 
-	err = g.Authenticate(GetAuthenticate())
-	if err != nil {
-		log.Fatalln(err)
-		t.FailNow()
-		return
-	}
-
 	err = g.ModifyScanner(command.NewModifyScanner(&command.ModifyScanner{
 		ScannerId: "f04ecbd5-6423-49b0-a92f-a99d2617dc31",
 		Type:      2,

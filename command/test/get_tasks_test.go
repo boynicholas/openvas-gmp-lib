@@ -17,13 +17,6 @@ func TestGetTasks(t *testing.T) {
 		return
 	}
 
-	err = g.Authenticate(GetAuthenticate())
-	if err != nil {
-		log.Fatalln(err)
-		t.FailNow()
-		return
-	}
-
 	resp, err := g.GetTasks(command.NewGetAllTasks())
 	if err != nil {
 		log.Fatalln(err)
