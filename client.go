@@ -21,7 +21,6 @@ type Client struct {
 	session *yamux.Session
 	ctx     context.Context
 	mutex   sync.Mutex
-	reader  *xml.Decoder
 	cfg     *ClientConfig
 }
 
@@ -129,7 +128,7 @@ func (c *Client) Send(datas []byte, v interface{}) error {
 }
 
 func (c *Client) read(reader *xml.Decoder, val interface{}) error {
-	token, err := c.reader.Token()
+	token, err := reader.Token()
 	if err != nil {
 		return err
 	}
@@ -141,7 +140,7 @@ func (c *Client) read(reader *xml.Decoder, val interface{}) error {
 
 	if startElement.Name.Local == "gmp_response" {
 		resp := &command.GmpResponse{}
-		err = c.reader.DecodeElement(resp, &startElement)
+		err = reader.DecodeElement(resp, &startElement)
 		if err != nil {
 			return err
 		}
@@ -154,10 +153,10 @@ func (c *Client) read(reader *xml.Decoder, val interface{}) error {
 		return nil
 	}
 
-	err = c.reader.DecodeElement(val, &startElement)
+	err = reader.DecodeElement(val, &startElement)
 	if err != nil {
 		resp := &command.GmpResponse{}
-		err = c.reader.Decode(resp)
+		err = reader.Decode(resp)
 		if err != nil {
 			return err
 		}
